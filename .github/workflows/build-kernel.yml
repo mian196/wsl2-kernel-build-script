@@ -1,0 +1,53 @@
+name: Build WSL2 Kernel
+
+on:
+  workflow_dispatch:
+    inputs:
+      kernel_series:
+        description: 'Kernel series to build'
+        required: true
+        default: '6'
+        type: choice
+        options:
+          - '6'
+          - '5'
+
+jobs:
+  build:
+    name: Build Kernel
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Kernel
+        env:
+          TMPDIR: ${{ github.workspace }}
+        run: |
+          # Use the command requested by the user
+          sudo bash build-kernel.sh --series ${{ github.event.inputs.kernel_series }} --skip-wslconfig
+
+      - name: Prepare Release Metadata
+        id: meta
+        run: |
+          # Create a unique tag based on the current date and time
+          TIMESTAMP=$(date +'%Y.%m.%d-%H%M')
+          echo "TAG_NAME=v$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "RELEASE_NAME=WSL2 Kernel Series ${{ github.event.inputs.kernel_series }} ($TIMESTAMP)" >> $GITHUB_OUTPUT
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.TAG_NAME }}
+          name: ${{ steps.meta.outputs.RELEASE_NAME }}
+          files: vmlinux
+          body: |
+            Automatically built WSL2 Kernel (Series ${{ github.event.inputs.kernel_series }}).
+            
+            **Build Command:** `sudo bash build-kernel.sh --series ${{ github.event.inputs.kernel_series }} --skip-wslconfig`
+            **Build Date:** $(date -u)
+          generate_release_notes: true
+          draft: false
+          prerelease: false

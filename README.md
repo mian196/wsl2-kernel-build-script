@@ -86,14 +86,15 @@ After updating the Windows config, apply the change from PowerShell or Command P
 wsl --shutdown
 ```
 
-## Development
+## GitHub Actions
 
-Run the local checks before pushing changes:
+This repository includes a GitHub Actions workflow to build the kernel in the cloud and publish it as a release. This is useful if you want to build the kernel without using your local resources.
 
-```sh
-make lint
-make smoke
-```
+1. Go to the **Actions** tab in your repository.
+2. Select the **Build WSL2 Kernel** workflow.
+3. Click **Run workflow**.
+4. Choose the kernel series (5 or 6).
+5. Once the build is complete, the `vmlinux` file will be available for download in the **Releases** section.
 
 ## References
 
