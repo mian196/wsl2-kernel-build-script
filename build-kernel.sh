@@ -73,7 +73,7 @@ EOF
 }
 
 log() {
-    printf '%s[INFO]%s %s\n' "$GREEN" "$RESET" "$*"
+    printf '%s[INFO]%s %s\n' "$GREEN" "$RESET" "$*" >&2
 }
 
 warn() {
