@@ -332,13 +332,17 @@ build_kernel() {
 copy_vmlinux() {
     local source_vmlinux="${source_dir}/vmlinux"
     local destination="${output_directory}/vmlinux"
+    local version_file="${output_directory}/vmlinux.version"
 
     [[ -f "$source_vmlinux" ]] || fail "Kernel build completed without producing vmlinux."
 
     install -m 0644 "$source_vmlinux" "$destination"
+    printf '%s\n' "$selected_version" > "$version_file"
     own_file_for_user "$destination"
+    own_file_for_user "$version_file"
 
     log "Kernel build complete. vmlinux written to ${destination}"
+    log "Kernel version written to ${version_file}"
 }
 
 prompt_wslconfig_generation() {
