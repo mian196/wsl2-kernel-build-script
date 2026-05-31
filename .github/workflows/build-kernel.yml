@@ -22,12 +22,32 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-${{ runner.os }}-series-${{ github.event.inputs.kernel_series }}-${{ hashFiles('config-wsl', 'build-kernel.sh') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-series-${{ github.event.inputs.kernel_series }}-
+            ccache-${{ runner.os }}-
+
       - name: Build Kernel
         env:
           TMPDIR: ${{ github.workspace }}
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_MAXSIZE: 2G
         run: |
           # Use the command requested by the user
-          sudo bash build-kernel.sh --series ${{ github.event.inputs.kernel_series }} --skip-wslconfig
+          sudo env CCACHE_DIR="$CCACHE_DIR" CCACHE_BASEDIR="$CCACHE_BASEDIR" CCACHE_MAXSIZE="$CCACHE_MAXSIZE" bash build-kernel.sh --series ${{ github.event.inputs.kernel_series }} --skip-wslconfig
+          sudo chown -R "$(id -u):$(id -g)" "$CCACHE_DIR"
+
+      - name: Show ccache Stats
+        env:
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+        run: |
+          ccache --show-stats || true
 
       - name: Prepare Release Metadata
         id: meta

@@ -310,16 +310,22 @@ resolve_kernel_config() {
 
 build_kernel() {
     local effective_config
+    local -a make_args=()
     effective_config="$(resolve_kernel_config)"
+
+    if command_exists ccache; then
+        log "Using ccache for kernel compilation."
+        make_args+=(CC="ccache gcc" HOSTCC="ccache gcc")
+    fi
 
     log "Preparing kernel configuration..."
     cp -- "$effective_config" "${source_dir}/.config"
 
     (
         cd -- "$source_dir"
-        run_logged make olddefconfig
-        run_logged make -j"$(nproc --all)"
-        run_logged make modules_install headers_install
+        run_logged make "${make_args[@]}" olddefconfig
+        run_logged make "${make_args[@]}" -j"$(nproc --all)"
+        run_logged make "${make_args[@]}" modules_install headers_install
     )
 }
 
