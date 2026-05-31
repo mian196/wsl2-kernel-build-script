@@ -39,17 +39,22 @@ jobs:
           echo "RELEASE_NAME=WSL2 Kernel Series ${{ github.event.inputs.kernel_series }} ($TIMESTAMP)" >> $GITHUB_OUTPUT
           echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_OUTPUT
 
+      - name: Compress Kernel
+        run: |
+          xz --keep --threads=0 --extreme -9 vmlinux
+
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.meta.outputs.TAG_NAME }}
           name: ${{ steps.meta.outputs.RELEASE_NAME }}
-          files: vmlinux
+          files: vmlinux.xz
           body: |
             Automatically built WSL2 Kernel (Series ${{ github.event.inputs.kernel_series }}).
             
             **Build Command:** `sudo bash build-kernel.sh --series ${{ github.event.inputs.kernel_series }} --skip-wslconfig`
             **Build Date:** ${{ steps.meta.outputs.BUILD_DATE }}
+            **Asset:** `vmlinux.xz` compressed with `xz -9e`; decompress before using it as a WSL2 kernel.
           generate_release_notes: true
           draft: false
           prerelease: false
