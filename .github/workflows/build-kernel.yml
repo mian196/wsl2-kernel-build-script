@@ -35,7 +35,7 @@ jobs:
         env:
           TMPDIR: ${{ github.workspace }}
           CCACHE_DIR: ${{ github.workspace }}/.ccache
-          CCACHE_MAXSIZE: 2G
+          CCACHE_MAXSIZE: 5G
         run: |
           # Use the command requested by the user
           sudo env CCACHE_DIR="$CCACHE_DIR" CCACHE_MAXSIZE="$CCACHE_MAXSIZE" bash build-kernel.sh --series ${{ github.event.inputs.kernel_series }} --skip-wslconfig
