@@ -315,6 +315,9 @@ build_kernel() {
 
     if command_exists ccache; then
         log "Using ccache for kernel compilation."
+        export CCACHE_BASEDIR="$source_dir"
+        export CCACHE_NOHASHDIR=true
+        ccache --set-config=max_size="${CCACHE_MAXSIZE:-2G}" || true
         make_args+=(CC="ccache gcc" HOSTCC="ccache gcc")
     fi
 
